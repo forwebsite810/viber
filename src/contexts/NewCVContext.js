@@ -247,6 +247,14 @@ export function CVProvider({ children }) {
     });
   };
 
+  // General update function for CV data
+  const updateCVData = (updates) => {
+    setCvData(prev => ({
+      ...prev,
+      ...updates
+    }));
+  };
+
   const value = {
     cvData,
     currentStep,
@@ -277,7 +285,8 @@ export function CVProvider({ children }) {
     goToStep,
     togglePreview,
     loadExtractedData,
-    resetCV
+    resetCV,
+    updateCVData
   };
 
   return (
