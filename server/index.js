@@ -1,7 +1,7 @@
 // server/index.js
 import express from "express";
 import multer from "multer";
-import pdfParse from "pdf-parse";
+import * as pdfParse from "pdf-parse";
 import tesseract from "node-tesseract-ocr";
 import fetch from "node-fetch";
 import cors from "cors";
