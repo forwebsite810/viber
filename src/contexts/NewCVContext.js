@@ -8,42 +8,45 @@ export function useCV() {
 
 export function CVProvider({ children }) {
   const [cvData, setCvData] = useState({
-    // Header Section
-    header: {
+    // 1. Personal Info
+    personalInfo: {
       fullName: '',
       title: '',
       phone: '',
       email: '',
+      location: '',
       linkedin: '',
+      github: '',
+      website: '',
       summary: ''
     },
     
-    // Experience
-    experience: [],
-    
-    // Education
+    // 2. Education
     education: [],
     
-    // Skills
-    skills: {
-      technical: [],
-      soft: []
-    },
+    // 3. Job Experience
+    jobExperience: [],
     
-    // Programming Languages
-    programmingLanguages: [],
+    // 4. Skills
+    skills: [],
     
-    // Software/Tools
-    softwareTools: [],
+    // 5. Tools
+    tools: [],
     
-    // Volunteering/Extracurricular
-    volunteering: [],
+    // 6. Projects
+    projects: [],
     
-    // Summary Section
-    profileSummary: '',
+    // 7. Achievements
+    achievements: [],
     
-    // Custom Sections
-    customSections: []
+    // 8. Languages
+    languages: [],
+    
+    // 9. Custom
+    custom: {
+      title: '',
+      content: ''
+    }
   });
 
   const [selectedTemplate, setSelectedTemplate] = useState('TemplateOne');
@@ -51,15 +54,15 @@ export function CVProvider({ children }) {
   const [currentStep, setCurrentStep] = useState(1);
   const [isPreviewMode, setIsPreviewMode] = useState(false);
   const [sectionsToInclude, setSectionsToInclude] = useState({
-    header: true,
-    experience: true,
+    personalInfo: true,
     education: true,
+    jobExperience: true,
     skills: true,
-    programmingLanguages: true,
-    softwareTools: true,
-    volunteering: false,
-    profileSummary: true,
-    customSections: true
+    tools: true,
+    projects: true,
+    achievements: true,
+    languages: true,
+    custom: true
   });
 
   const updateHeader = (header) => {
@@ -213,37 +216,41 @@ export function CVProvider({ children }) {
 
   const resetCV = () => {
     setCvData({
-      header: {
+      personalInfo: {
         fullName: '',
         title: '',
         phone: '',
         email: '',
+        location: '',
         linkedin: '',
+        github: '',
+        website: '',
         summary: ''
       },
-      experience: [],
       education: [],
-      skills: {
-        technical: [],
-        soft: []
-      },
-      programmingLanguages: [],
-      softwareTools: [],
-      volunteering: [],
-      profileSummary: '',
-      customSections: []
+      jobExperience: [],
+      skills: [],
+      tools: [],
+      projects: [],
+      achievements: [],
+      languages: [],
+      custom: {
+        title: '',
+        content: ''
+      }
     });
     setCurrentStep(1);
     setIsPreviewMode(false);
     setSectionsToInclude({
-      header: true,
-      experience: true,
+      personalInfo: true,
       education: true,
+      jobExperience: true,
       skills: true,
-      programmingLanguages: true,
-      softwareTools: true,
-      volunteering: false,
-      profileSummary: true
+      tools: true,
+      projects: true,
+      achievements: true,
+      languages: true,
+      custom: true
     });
   };
 
