@@ -1,164 +1,270 @@
-import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
 
-export const generatePDF = async (filename = 'My_CV.pdf') => {
-  try {
-    // Get the CV preview element
-    const cvSection = document.getElementById('cv-preview');
-    if (!cvSection) {
-      throw new Error('CV preview section not found');
-    }
-
-    // Show loading state
-    const originalContent = cvSection.innerHTML;
-    cvSection.innerHTML = `
-      <div class="flex items-center justify-center h-64">
-        <div class="text-center">
-          <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p class="text-gray-600">Generating PDF...</p>
-        </div>
-      </div>
-    `;
-
-    // Wait a moment for the loading state to be visible
-    await new Promise(resolve => setTimeout(resolve, 500));
-
-    // Restore original content
-    cvSection.innerHTML = originalContent;
-
-    // Wait for fonts and images to load
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // Configure html2canvas options for high quality
-    const canvas = await html2canvas(cvSection, {
-      scale: 3, // Higher resolution for better quality
-      useCORS: true, // Allow cross-origin images
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      width: cvSection.scrollWidth,
-      height: cvSection.scrollHeight,
-      scrollX: 0,
-      scrollY: 0,
-      windowWidth: cvSection.scrollWidth,
-      windowHeight: cvSection.scrollHeight,
-      foreignObjectRendering: true, // Better text rendering
-      removeContainer: true // Remove container styling
-    });
-
-    // Get canvas dimensions
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
-
-    // Create PDF with A4 dimensions
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-
-    // Calculate scaling to fit content
-    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-    const scaledWidth = imgWidth * ratio;
-    const scaledHeight = imgHeight * ratio;
-
-    // Center the content on the page
-    const xOffset = (pdfWidth - scaledWidth) / 2;
-    const yOffset = (pdfHeight - scaledHeight) / 2;
-
-    // Convert canvas to image data
-    const imgData = canvas.toDataURL('image/png', 1.0);
-
-    // Add image to PDF
-    pdf.addImage(imgData, 'PNG', xOffset, yOffset, scaledWidth, scaledHeight);
-
-    // Handle multi-page content if needed
-    if (scaledHeight > pdfHeight) {
-      const totalPages = Math.ceil(scaledHeight / pdfHeight);
-      
-      for (let i = 1; i < totalPages; i++) {
-        pdf.addPage();
-        const yPosition = -i * pdfHeight;
-        pdf.addImage(imgData, 'PNG', xOffset, yPosition, scaledWidth, scaledHeight);
-      }
-    }
-
-    // Save the PDF
-    pdf.save(filename);
-
-    return { success: true, filename };
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    throw new Error(`Failed to generate PDF: ${error.message}`);
-  }
-};
-
-export const generatePDFWithProgress = async (filename = 'My_CV.pdf', onProgress) => {
-  try {
-    onProgress?.(10, 'Preparing CV content...');
+export const generateCVPDF = (cvData) => {
+  const doc = new jsPDF();
+  
+  // Set font
+  doc.setFont('helvetica');
+  
+  // Colors
+  const black = '#000000';
+  const darkGray = '#333333';
+  const lightGray = '#666666';
+  
+  let yPosition = 20;
+  const leftMargin = 20;
+  const rightMargin = 20;
+  const pageWidth = doc.internal.pageSize.width;
+  const contentWidth = pageWidth - leftMargin - rightMargin;
+  
+  // Helper function to add text with word wrap
+  const addText = (text, x, y, options = {}) => {
+    const {
+      fontSize = 12,
+      fontStyle = 'normal',
+      color = black,
+      maxWidth = contentWidth,
+      align = 'left'
+    } = options;
     
-    const cvSection = document.getElementById('cv-preview');
-    if (!cvSection) {
-      throw new Error('CV preview section not found');
-    }
-
-    onProgress?.(30, 'Capturing CV preview...');
+    doc.setFontSize(fontSize);
+    doc.setFont('helvetica', fontStyle);
+    doc.setTextColor(color);
     
-    // Configure html2canvas for high quality
-    const canvas = await html2canvas(cvSection, {
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      width: cvSection.scrollWidth,
-      height: cvSection.scrollHeight
+    const lines = doc.splitTextToSize(text, maxWidth);
+    doc.text(lines, x, y);
+    return y + (lines.length * fontSize * 0.4) + 2;
+  };
+  
+  // Helper function to add section header
+  const addSectionHeader = (title, y) => {
+    doc.setFontSize(14);
+    doc.setFont('helvetica', 'bold');
+    doc.setTextColor(black);
+    doc.text(title, leftMargin, y);
+    
+    // Add underline
+    doc.setLineWidth(0.5);
+    doc.setDrawColor(black);
+    doc.line(leftMargin, y + 1, pageWidth - rightMargin, y + 1);
+    
+    return y + 8;
+  };
+  
+  // Header Section
+  if (cvData.personalInfo?.fullName) {
+    yPosition = addText(cvData.personalInfo.fullName, leftMargin, yPosition, {
+      fontSize: 18,
+      fontStyle: 'bold',
+      color: black
     });
-
-    onProgress?.(60, 'Processing image data...');
-
-    // Get canvas dimensions
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
-
-    // Create PDF
-    const pdf = new jsPDF('p', 'mm', 'a4');
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-
-    // Calculate scaling
-    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-    const scaledWidth = imgWidth * ratio;
-    const scaledHeight = imgHeight * ratio;
-
-    // Center content
-    const xOffset = (pdfWidth - scaledWidth) / 2;
-    const yOffset = (pdfHeight - scaledHeight) / 2;
-
-    onProgress?.(80, 'Generating PDF...');
-
-    // Add image to PDF
-    const imgData = canvas.toDataURL('image/png', 1.0);
-    pdf.addImage(imgData, 'PNG', xOffset, yOffset, scaledWidth, scaledHeight);
-
-    // Handle multi-page content
-    if (scaledHeight > pdfHeight) {
-      const totalPages = Math.ceil(scaledHeight / pdfHeight);
-      
-      for (let i = 1; i < totalPages; i++) {
-        pdf.addPage();
-        const yPosition = -i * pdfHeight;
-        pdf.addImage(imgData, 'PNG', xOffset, yPosition, scaledWidth, scaledHeight);
-      }
-    }
-
-    onProgress?.(95, 'Finalizing PDF...');
-
-    // Save PDF
-    pdf.save(filename);
-
-    onProgress?.(100, 'PDF generated successfully!');
-    return { success: true, filename };
-  } catch (error) {
-    console.error('Error generating PDF:', error);
-    throw new Error(`Failed to generate PDF: ${error.message}`);
   }
+  
+  if (cvData.personalInfo?.title) {
+    yPosition = addText(cvData.personalInfo.title, leftMargin, yPosition, {
+      fontSize: 14,
+      color: darkGray
+    });
+  }
+  
+  // Contact Information
+  const contactInfo = [];
+  if (cvData.personalInfo?.email) contactInfo.push(cvData.personalInfo.email);
+  if (cvData.personalInfo?.phone) contactInfo.push(cvData.personalInfo.phone);
+  if (cvData.personalInfo?.location) contactInfo.push(cvData.personalInfo.location);
+  if (cvData.personalInfo?.linkedin) contactInfo.push(cvData.personalInfo.linkedin);
+  if (cvData.personalInfo?.github) contactInfo.push(cvData.personalInfo.github);
+  if (cvData.personalInfo?.website) contactInfo.push(cvData.personalInfo.website);
+  
+  if (contactInfo.length > 0) {
+    yPosition = addText(contactInfo.join(' • '), leftMargin, yPosition, {
+      fontSize: 10,
+      color: lightGray
+    });
+  }
+  
+  yPosition += 10;
+  
+  // Professional Summary
+  if (cvData.personalInfo?.summary) {
+    yPosition = addSectionHeader('PROFESSIONAL SUMMARY', yPosition);
+    yPosition = addText(cvData.personalInfo.summary, leftMargin, yPosition, {
+      fontSize: 11,
+      color: black
+    });
+    yPosition += 5;
+  }
+  
+  // Work Experience
+  if (cvData.jobExperience && cvData.jobExperience.length > 0) {
+    yPosition = addSectionHeader('WORK EXPERIENCE', yPosition);
+    
+    cvData.jobExperience.forEach((exp, index) => {
+      if (exp.position || exp.company) {
+        const title = exp.position ? exp.position : '';
+        const company = exp.company ? exp.company : '';
+        const positionText = title && company ? `${title} at ${company}` : title || company;
+        
+        yPosition = addText(positionText, leftMargin, yPosition, {
+          fontSize: 12,
+          fontStyle: 'bold',
+          color: black
+        });
+        
+        if (exp.duration) {
+          yPosition = addText(exp.duration, leftMargin, yPosition, {
+            fontSize: 10,
+            color: lightGray
+          });
+        }
+        
+        if (exp.description) {
+          yPosition = addText(exp.description, leftMargin, yPosition, {
+            fontSize: 11,
+            color: black
+          });
+        }
+        
+        yPosition += 3;
+      }
+    });
+  }
+  
+  // Education
+  if (cvData.education && cvData.education.length > 0) {
+    yPosition = addSectionHeader('EDUCATION', yPosition);
+    
+    cvData.education.forEach((edu, index) => {
+      if (edu.degree || edu.institution) {
+        const degree = edu.degree ? edu.degree : '';
+        const institution = edu.institution ? edu.institution : '';
+        const educationText = degree && institution ? `${degree} from ${institution}` : degree || institution;
+        
+        yPosition = addText(educationText, leftMargin, yPosition, {
+          fontSize: 12,
+          fontStyle: 'bold',
+          color: black
+        });
+        
+        if (edu.year) {
+          yPosition = addText(edu.year, leftMargin, yPosition, {
+            fontSize: 10,
+            color: lightGray
+          });
+        }
+        
+        if (edu.details) {
+          yPosition = addText(edu.details, leftMargin, yPosition, {
+            fontSize: 11,
+            color: black
+          });
+        }
+        
+        yPosition += 3;
+      }
+    });
+  }
+  
+  // Skills
+  if (cvData.skills && cvData.skills.length > 0) {
+    yPosition = addSectionHeader('SKILLS', yPosition);
+    yPosition = addText(cvData.skills.join(', '), leftMargin, yPosition, {
+      fontSize: 11,
+      color: black
+    });
+    yPosition += 5;
+  }
+  
+  // Tools
+  if (cvData.tools && cvData.tools.length > 0) {
+    yPosition = addSectionHeader('TOOLS', yPosition);
+    yPosition = addText(cvData.tools.join(', '), leftMargin, yPosition, {
+      fontSize: 11,
+      color: black
+    });
+    yPosition += 5;
+  }
+  
+  // Projects
+  if (cvData.projects && cvData.projects.length > 0) {
+    yPosition = addSectionHeader('PROJECTS', yPosition);
+    
+    cvData.projects.forEach((project, index) => {
+      if (project.name) {
+        yPosition = addText(project.name, leftMargin, yPosition, {
+          fontSize: 12,
+          fontStyle: 'bold',
+          color: black
+        });
+        
+        if (project.description) {
+          yPosition = addText(project.description, leftMargin, yPosition, {
+            fontSize: 11,
+            color: black
+          });
+        }
+        
+        if (project.technologies) {
+          yPosition = addText(`Technologies: ${project.technologies}`, leftMargin, yPosition, {
+            fontSize: 10,
+            color: lightGray
+          });
+        }
+        
+        yPosition += 3;
+      }
+    });
+  }
+  
+  // Achievements
+  if (cvData.achievements && cvData.achievements.length > 0) {
+    yPosition = addSectionHeader('ACHIEVEMENTS', yPosition);
+    
+    cvData.achievements.forEach((achievement, index) => {
+      if (achievement.title) {
+        yPosition = addText(achievement.title, leftMargin, yPosition, {
+          fontSize: 12,
+          fontStyle: 'bold',
+          color: black
+        });
+        
+        if (achievement.date) {
+          yPosition = addText(achievement.date, leftMargin, yPosition, {
+            fontSize: 10,
+            color: lightGray
+          });
+        }
+        
+        if (achievement.description) {
+          yPosition = addText(achievement.description, leftMargin, yPosition, {
+            fontSize: 11,
+            color: black
+          });
+        }
+        
+        yPosition += 3;
+      }
+    });
+  }
+  
+  // Languages
+  if (cvData.languages && cvData.languages.length > 0) {
+    yPosition = addSectionHeader('LANGUAGES', yPosition);
+    yPosition = addText(cvData.languages.join(', '), leftMargin, yPosition, {
+      fontSize: 11,
+      color: black
+    });
+    yPosition += 5;
+  }
+  
+  // Custom Section
+  if (cvData.custom?.title && cvData.custom?.content) {
+    yPosition = addSectionHeader(cvData.custom.title.toUpperCase(), yPosition);
+    yPosition = addText(cvData.custom.content, leftMargin, yPosition, {
+      fontSize: 11,
+      color: black
+    });
+  }
+  
+  return doc;
 };

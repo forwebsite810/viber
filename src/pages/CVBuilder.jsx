@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useCV } from '../contexts/NewCVContext';
+import PreviewModal from '../components/PreviewModal';
+import { generateCVPDF } from '../utils/pdfGenerator';
 import { 
   User, 
   GraduationCap, 
@@ -43,6 +45,7 @@ export default function CVBuilder() {
   const [activeSection, setActiveSection] = useState('personalInfo');
   const [showToast, setShowToast] = useState(false);
   const [toastMessage, setToastMessage] = useState('');
+  const [showPreviewModal, setShowPreviewModal] = useState(false);
 
   const showToastMessage = (message) => {
     setToastMessage(message);
@@ -51,11 +54,21 @@ export default function CVBuilder() {
   };
 
   const handleDownloadPDF = async () => {
-    showToastMessage('Generating PDF...');
-    // PDF generation logic would go here
-    setTimeout(() => {
+    try {
+      showToastMessage('Generating PDF...');
+      
+      // Generate PDF using the utility
+      const pdf = generateCVPDF(cvData);
+      
+      // Save the PDF
+      const fileName = `${cvData.personalInfo?.fullName || 'CV'}_Resume.pdf`;
+      pdf.save(fileName);
+      
       showToastMessage('CV downloaded successfully!');
-    }, 2000);
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      showToastMessage('Error generating PDF. Please try again.');
+    }
   };
 
   const handleCopyToClipboard = async () => {
@@ -223,7 +236,7 @@ export default function CVBuilder() {
   const renderCurrentSection = () => {
     switch (activeSection) {
       case 'personalInfo':
-        return (
+    return (
           <div className="space-y-6">
             <h3 className="text-2xl font-semibold text-slate-900 dark:text-white flex items-center">
               <User className="w-6 h-6 mr-3 text-blue-600" />
@@ -429,8 +442,8 @@ export default function CVBuilder() {
                       placeholder="GPA, Honors, etc."
                     />
                   </div>
-                </div>
-              </div>
+        </div>
+      </div>
             ))}
           </div>
         );
@@ -514,8 +527,8 @@ export default function CVBuilder() {
                     />
                   </div>
                 </div>
-              </div>
-            ))}
+                </div>
+              ))}
           </div>
         );
 
@@ -803,6 +816,13 @@ export default function CVBuilder() {
             </div>
             <div className="flex items-center space-x-3">
               <button
+                onClick={() => setShowPreviewModal(true)}
+                className="flex items-center space-x-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
+              >
+                <Eye className="w-4 h-4" />
+                <span>Preview CV</span>
+              </button>
+              <button
                 onClick={handleCopyToClipboard}
                 className="flex items-center space-x-2 px-4 py-2 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 rounded-lg transition-colors"
               >
@@ -848,7 +868,7 @@ export default function CVBuilder() {
                     };
                     
                     return (
-                      <button
+                <button
                         key={section.key}
                         onClick={() => setActiveSection(section.key)}
                         className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg transition-all duration-200 ${
@@ -862,7 +882,7 @@ export default function CVBuilder() {
                         {isActive && (
                           <div className="ml-auto w-2 h-2 bg-current rounded-full"></div>
                         )}
-                      </button>
+                </button>
                     );
                   })}
                 </nav>
@@ -1101,6 +1121,15 @@ export default function CVBuilder() {
           </div>
         </div>
       </div>
+
+      {/* Preview Modal */}
+      <PreviewModal
+        isOpen={showPreviewModal}
+        onClose={() => setShowPreviewModal(false)}
+        cvData={cvData}
+        onDownloadPDF={handleDownloadPDF}
+        onCopyToClipboard={handleCopyToClipboard}
+      />
 
       {/* Toast Notification */}
       {showToast && (
