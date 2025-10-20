@@ -1,7 +1,7 @@
 // server/index.js
 import express from "express";
 import multer from "multer";
-import { PDFParse } from "pdf-parse";
+import pdfParse from "pdf-parse";
 import tesseract from "node-tesseract-ocr";
 import fetch from "node-fetch";
 import cors from "cors";
@@ -14,6 +14,11 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Ensure uploads directory exists
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads", { recursive: true });
+}
+
 const upload = multer({ dest: "uploads/" });
 
 const GEMINI_KEY = process.env.GEMINI_API_KEY;
@@ -21,9 +26,15 @@ const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemi
 
 // helper: extract text using pdf-parse
 async function extractTextPDF(filePath) {
-  const dataBuffer = fs.readFileSync(filePath);
-  const data = await PDFParse(dataBuffer);
-  return data.text || "";
+  try {
+    const dataBuffer = fs.readFileSync(filePath);
+    const data = await pdfParse(dataBuffer);
+    console.log("PDF parse successful, text length:", data.text?.length || 0);
+    return data.text || "";
+  } catch (error) {
+    console.error("PDF parse error:", error);
+    throw new Error(`PDF parsing failed: ${error.message}`);
+  }
 }
 
 // helper: OCR fallback using tesseract
@@ -84,12 +95,19 @@ function parseAIResponse(data) {
 }
 
 app.post("/api/analyze-cv", upload.single("cv"), async (req, res) => {
+  console.log("Received file upload request");
   const file = req.file;
-  if (!file) return res.status(400).json({ error: "No file uploaded" });
+  if (!file) {
+    console.log("No file uploaded");
+    return res.status(400).json({ error: "No file uploaded" });
+  }
 
+  console.log("File received:", file.originalname, "Size:", file.size);
   const filePath = path.resolve(file.path);
+  
   try {
     // Step 1: PDF text extraction
+    console.log("Starting PDF text extraction...");
     let text = await extractTextPDF(filePath);
     console.log("Extracted text length:", text.length);
 
@@ -112,11 +130,13 @@ ${text}
 `;
 
     // Step 4: Call Gemini
+    console.log("Calling Gemini API...");
     const aiRaw = await callGemini(prompt);
     console.log("Gemini raw response object:", aiRaw);
 
     // Step 5: Parse AI response safely
     const parsed = parseAIResponse(aiRaw);
+    console.log("Parsed response:", parsed);
 
     // Step 6: return result and the text excerpt for debugging
     res.json({ parsed, excerpt });
