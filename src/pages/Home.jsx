@@ -5,9 +5,7 @@ import { useTheme } from '../contexts/ThemeContext';
 import Card from '../components/Card';
 import Button from '../components/Button';
 import { 
-  Sparkles, 
   FileText, 
-  Upload, 
   Download, 
   Palette, 
   Zap,
@@ -37,18 +35,18 @@ export default function Home() {
         <div className="max-w-7xl mx-auto text-center">
           <div className="inline-flex items-center px-6 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-sm font-medium text-gray-700 dark:text-gray-300 mb-12">
             <Zap className="w-5 h-5 mr-3 text-yellow-500" />
-            AI-Powered Portfolio Generation
+            Professional CV Builder
           </div>
           
           <h1 className="text-7xl md:text-9xl font-poppins font-bold text-gray-900 dark:text-white mb-8 text-shadow-lg">
-            Transform Your
+            Create Your
             <span className="block gradient-text">
-              CV into Portfolio
+              Perfect CV
             </span>
           </h1>
           
           <p className="text-2xl md:text-3xl text-gray-600 dark:text-gray-300 mb-16 max-w-4xl mx-auto leading-relaxed">
-            Upload your CV or create one from scratch. Our AI analyzes your experience and generates a stunning, professional portfolio website in minutes.
+            Build a professional CV with our easy-to-use builder. Choose from beautiful templates and create a standout resume in minutes.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-6 justify-center items-center">
@@ -91,10 +89,10 @@ export default function Home() {
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-20">
             <h2 className="text-5xl md:text-6xl font-poppins font-bold text-gray-900 dark:text-white mb-8 text-shadow-lg">
-              Why Choose Vibe Coding?
+              Why Choose Our CV Builder?
             </h2>
             <p className="text-2xl text-gray-600 dark:text-gray-300 max-w-3xl mx-auto">
-              Experience the future of portfolio creation with our cutting-edge AI technology
+              Create professional CVs with our intuitive and powerful builder
             </p>
           </div>
 
@@ -102,20 +100,20 @@ export default function Home() {
             {[
               {
                 icon: <FileText className="w-10 h-10" />,
-                title: "Smart CV Analysis",
-                description: "Upload your CV and let our AI extract all the important information automatically",
+                title: "Easy CV Creation",
+                description: "Build your CV step by step with our intuitive form-based interface",
                 gradient: "from-blue-500 to-indigo-600"
               },
               {
                 icon: <Palette className="w-10 h-10" />,
-                title: "Beautiful Templates",
-                description: "Choose from stunning, modern portfolio templates that showcase your skills perfectly",
+                title: "Professional Templates",
+                description: "Choose from beautiful, modern CV templates that showcase your skills perfectly",
                 gradient: "from-purple-500 to-pink-600"
               },
               {
                 icon: <Download className="w-10 h-10" />,
-                title: "Export & Deploy",
-                description: "Download your portfolio as a ZIP file or deploy it directly to the web with one click",
+                title: "Export & Download",
+                description: "Download your CV as a PDF file ready for job applications",
                 gradient: "from-green-500 to-emerald-600"
               }
             ].map((feature, index) => (
@@ -145,10 +143,10 @@ export default function Home() {
         <div className="max-w-5xl mx-auto text-center">
           <Card variant="glass" className="p-16">
             <h2 className="text-5xl md:text-6xl font-poppins font-bold text-gray-900 dark:text-white mb-8 text-shadow-lg">
-              Ready to Build Your Portfolio?
+              Ready to Create Your CV?
             </h2>
             <p className="text-2xl text-gray-600 dark:text-gray-300 mb-12">
-              Join thousands of professionals who have transformed their careers with stunning portfolios
+              Join thousands of professionals who have created standout CVs with our builder
             </p>
             {currentUser ? (
               <Button
