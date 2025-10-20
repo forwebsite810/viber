@@ -82,7 +82,7 @@ export default function UploadCV() {
       setExtractedData(result.parsed);
       setAnalysisComplete(true);
     } catch (err) {
-      setError(err.message || 'Sorry, we couldn't analyze this CV. Please try another one.');
+      setError(err?.message || "Sorry, we couldn't analyze this CV. Please try another one.");
     } finally {
       setIsAnalyzing(false);
     }
