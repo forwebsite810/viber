@@ -40,8 +40,6 @@ export default function Navbar() {
     { name: 'Home', path: '/', icon: Home },
     { name: 'Dashboard', path: '/dashboard', icon: FileText, protected: true },
     { name: 'Create CV', path: '/create-cv', icon: FileText, protected: true },
-    { name: 'Portfolio Generator', path: '/portfolio-generator', icon: Sparkles },
-    { name: 'Enhanced Portfolio', path: '/enhanced-portfolio', icon: Sparkles },
   ];
 
   return (
