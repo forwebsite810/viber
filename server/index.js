@@ -1,7 +1,7 @@
 // server/index.js
 import express from "express";
 import multer from "multer";
-import * as pdfParse from "pdf-parse";
+import { PDFParse } from "pdf-parse";
 import tesseract from "node-tesseract-ocr";
 import fetch from "node-fetch";
 import cors from "cors";
@@ -22,7 +22,7 @@ const GEMINI_URL = `https://generativelanguage.googleapis.com/v1beta/models/gemi
 // helper: extract text using pdf-parse
 async function extractTextPDF(filePath) {
   const dataBuffer = fs.readFileSync(filePath);
-  const data = await pdfParse(dataBuffer);
+  const data = await PDFParse(dataBuffer);
   return data.text || "";
 }
 
