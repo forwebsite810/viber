@@ -14,7 +14,6 @@ import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import CreateCV from './pages/CreateCV';
 import CVBuilder from './pages/CVBuilder';
-import UploadCV from './pages/UploadCV';
 import PreviewCV from './pages/PreviewCV';
 import PortfolioPreview from './pages/PortfolioPreview';
 import PortfolioGenerated from './pages/PortfolioGenerated';
@@ -67,14 +66,6 @@ function App() {
                 element={
                   <ProtectedRoute>
                     <CVBuilder />
-                  </ProtectedRoute>
-                } 
-              />
-              <Route 
-                path="/upload-cv" 
-                element={
-                  <ProtectedRoute>
-                    <UploadCV />
                   </ProtectedRoute>
                 } 
               />
