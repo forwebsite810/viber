@@ -27,7 +27,7 @@ export const db = getFirestore(app);
 export const storage = getStorage(app); 
 
 // Local dev notice (console only)
-if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
+if (typeof window !== 'undefined' && window.location.hostname === 'https://viber-bw4jslszn-tayyab-shafiques-projects-55d7fe1c.vercel.app') {
   console.log('Running locally without Firebase emulator.');
 }
 
